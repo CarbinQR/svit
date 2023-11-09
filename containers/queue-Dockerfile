@@ -1,0 +1,8 @@
+FROM php:7.4-alpine
+
+RUN apk --update upgrade \ 
+    && apk add --no-cache --virtual build-dependencies $PHPIZE_DEPS libpng-dev libwebp-dev libjpeg-turbo-dev freetype-dev libzip-dev zip linux-headers \
+    && docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install -j$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) mysqli pdo_mysql pcntl gd zip \
+    && pecl install redis \
+    && docker-php-ext-enable redis \

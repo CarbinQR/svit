@@ -1,0 +1,9 @@
+FROM php:8.1-fpm-alpine
+
+RUN apk add --no-cache --virtual build-dependencies icu-dev libxml2-dev $PHPIZE_DEPS linux-headers  \
+    && apk add --no-cache libpng-dev \
+    && docker-php-ext-install -j$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) mysqli opcache pdo_mysql xml fileinfo pdo exif\
+	&& pecl install redis \
+    && docker-php-ext-enable  redis
+
+RUN sed -i 's/access.log = \/proc\/self\/fd\/2/access.log = \/proc\/self\/fd\/1/g' /usr/local/etc/php-fpm.d/docker.conf
