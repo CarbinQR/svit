@@ -89,7 +89,7 @@ class SqlToCsvConverterService
         );
     }
 
-    public function convert(array $dumps)
+    public function convert(array $dumps): array
     {
         $links = [];
 
