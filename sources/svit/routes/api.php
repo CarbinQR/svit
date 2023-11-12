@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\CsvController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::group(['prefix' => 'csv'], function () {
+    Route::post('/convert-sql-to-csv', [CsvController::class, 'createFromSql'])->name('api.csv.createFromSql');
+    Route::post('/merge', [CsvController::class, 'merge'])->name('api.csv.merge');
+    Route::get('/download/{folderName}/{fileName}', [CsvController::class, 'download'])->name('api.csv.download');
 });
