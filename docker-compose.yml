@@ -1,24 +1,24 @@
 version: '3.7'
 
 networks:
-  svit:
+  world:
 
 services:
   nginx:
     image: nginx:1.18.0-alpine
-    container_name: nginx-svit
+    container_name: nginx-world
     environment:
       TZ: Europe/Kiev
     ports:
       - "8089:8089"
     volumes:
-      - ./sources/svit:/var/www/svit
+      - ./sources/world:/var/www/world
       - ./config/nginx/conf/default.conf:/etc/nginx/conf.d/default.conf
       - ./logs/nginx:/var/log/nginx
     depends_on:
       - php
     networks:
-      - svit
+      - world
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -26,16 +26,16 @@ services:
     build:
       context: ./containers
       dockerfile: php8.1-fpm-Dockerfile
-    container_name: php81-fpm-svit
+    container_name: php81-fpm-world
     environment:
       TZ: Europe/Kiev
     volumes:
-      - ./sources/svit:/var/www/svit
+      - ./sources/world:/var/www/world
       - ./config/php8/php.ini:/usr/local/etc/php/conf.d/php.ini:ro
     ports:
       - "9001:9000"
     networks:
-      - svit
+      - world
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -43,59 +43,59 @@ services:
     build:
       context: ./containers
       dockerfile: php8.1-cli-composer-Dockerfile
-    container_name: queue-svit
+    container_name: queue-world
     restart: unless-stopped
-    command:  ["php", "/var/www/svit/artisan", "queue:work"]
+    command:  ["php", "/var/www/world/artisan", "queue:work"]
     environment:
       TZ: Europe/Kiev
     depends_on:
       - redis
     volumes:
-      - ./sources/svit:/var/www/svit
+      - ./sources/world:/var/www/world
     networks:
-      - svit
+      - world
 
   composer:
     build:
       context: ./containers
       dockerfile: php8.1-cli-composer-Dockerfile
-    container_name: composer-svit
+    container_name: composer-world
     volumes:
-      - ./sources/svit:/var/www/svit
+      - ./sources/world:/var/www/world
     environment:
       TZ: Europe/Kiev
-    working_dir: /var/www/svit
+    working_dir: /var/www/world
     entrypoint: ["composer"]
     depends_on:
       - php
     networks:
-      - svit
+      - world
 
   npm:
     image: node:14.3
-    container_name: npm-svit
+    container_name: npm-world
     environment:
       TZ: Europe/Kiev
     volumes:
-      - ./sources/svit:/var/www/svit
-    working_dir: /var/www/svit
+      - ./sources/world:/var/www/world
+    working_dir: /var/www/world
     entrypoint: ["npm"]
     networks:
-      - svit
+      - world
 
   artisan:
     build:
       context: ./containers
       dockerfile: php8.1-cli-composer-Dockerfile
-    container_name: artisan-svit
+    container_name: artisan-world
     environment:
       TZ: Europe/Kiev
     volumes:
-      - ./sources/svit:/var/www/svit
-    working_dir: /var/www/svit
-    entrypoint: ["php", "/var/www/svit/artisan"]
+      - ./sources/world:/var/www/world
+    working_dir: /var/www/world
+    entrypoint: ["php", "/var/www/world/artisan"]
     networks:
-      - svit
+      - world
 
   redis:
     image: "redis:alpine"
@@ -104,6 +104,6 @@ services:
     command: ["redis-server"]
     environment:
       TZ: Europe/Kiev
-    container_name: redis-svit
+    container_name: redis-world
     networks:
-      - svit
+      - world
